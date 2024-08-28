@@ -15,13 +15,13 @@ var server = WireMockServer.Start(new WireMockServerSettings
     Urls = ["http://localhost:9091"],
     StartAdminInterface = true,
     ReadStaticMappings = true,
-    //ProxyAndRecordSettings = new ProxyAndRecordSettings
-    //{
-    //    Url = "https://localhost:7051/",
-    //    SaveMapping = true,
-    //    SaveMappingToFile = true,
-    //    ExcludedHeaders = ["Postman-Token"],
-    //},
+    ProxyAndRecordSettings = new ProxyAndRecordSettings
+    {
+        Url = "https://localhost:7051/",
+        SaveMapping = true,
+        SaveMappingToFile = true,
+        ExcludedHeaders = ["Postman-Token", "Cache-Control", "Content-Length", "User-Agent", "Accept", "Connection", "Accept-Encoding"],
+    },
     Logger = new WireMockConsoleLogger(),
 });
 
