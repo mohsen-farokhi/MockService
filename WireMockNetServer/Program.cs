@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Net;
+using System.Threading.Channels;
 using WireMock.Logging;
 using WireMock.Matchers;
 using WireMock.RequestBuilders;
@@ -11,21 +12,21 @@ using WireMock.Settings;
 // https://www.youtube.com/watch?v=SQRPqBWHeJs&list=PL6tu16kXT9Pr-y-moJz03XkZLH1ir4O_S
 // Server for Wiremock.NET
 var server = WireMockServer.Start(new WireMockServerSettings
-{ 
+{
     Urls = ["http://localhost:9091"],
     StartAdminInterface = true,
     ReadStaticMappings = true,
-    ProxyAndRecordSettings = new ProxyAndRecordSettings
-    {
-        Url = "https://localhost:7051/",
-        SaveMapping = true,
-        SaveMappingToFile = true,
-        ExcludedHeaders = ["Postman-Token", "Cache-Control", "Content-Length", "User-Agent", "Accept", "Connection", "Accept-Encoding"],
-    },
+    //ProxyAndRecordSettings = new ProxyAndRecordSettings
+    //{
+    //    Url = "https://localhost:7051/",
+    //    SaveMapping = true,
+    //    SaveMappingToFile = true,
+    //    ExcludedHeaders = ["Postman-Token", "Cache-Control", "Content-Length", "User-Agent", "Accept", "Connection", "Accept-Encoding"],
+    //},
     Logger = new WireMockConsoleLogger(),
 });
 
-//server.WatchStaticMappings();
+server.WatchStaticMappings();
 
 Console.WriteLine("Started WireNock.NET server");
 
@@ -127,6 +128,73 @@ server.Given(Request.Create()
         {"Cache-Control", "no-cache"}
     })
     .WithStatusCode(HttpStatusCode.Accepted));
+
+server.Given(
+    Request.Create()
+        .WithPath("/purchaseRequest/purchase")
+        .UsingPost()
+        .WithBody(new JsonMatcher(new
+        {
+            FromDate = "1721593800000",
+            ToDate = "1724876999000"
+        }))
+    )
+    .RespondWith(
+        Response.Create()
+            .WithStatusCode(HttpStatusCode.Accepted)
+            .WithHeaders(new Dictionary<string, string>
+            {
+                {"Content-Type", "application/json"},
+                {"Accept", "application/json" },
+                {"Cache-Control", "no-cache"}
+            })
+            .WithBodyAsJson(new JsonMatcher(new
+            {
+                Content = new List<dynamic>
+                {
+                    new
+                    {
+                        Id = 123,
+                        ChannelId = 432,
+                        ChannelName = "Kariz"
+                    }
+                }
+            }))
+    );
+
+server.Given(
+    Request.Create()
+        .WithPath("/purchaseRequest/purchase")
+        .UsingPost()
+        .WithBody(new JsonMatcher(new
+        {
+            FromDate = "1721593800001",
+            ToDate = "1724876999000"
+        }))
+    )
+    .RespondWith(
+        Response.Create()
+            .WithStatusCode(HttpStatusCode.Accepted)
+            .WithHeaders(new Dictionary<string, string>
+            {
+                {"Content-Type", "application/json"},
+                {"Accept", "application/json" },
+                {"Cache-Control", "no-cache"}
+            })
+            .WithBodyAsJson(new JsonMatcher(new
+            {
+                Content = new List<dynamic>
+                {
+                    new
+                    {
+                        Id = 1234,
+                        ChannelId = 432,
+                        ChannelName = "Kariz"
+                    }
+                }
+            }))
+    );
+
 
 server.SaveStaticMappings();
 
